@@ -61,8 +61,21 @@ RT_WEAK void *rt_heap_end_get(void)
 /**
  * This function will initial your board.
  */
+#include "stm32f4xx.h"
+void SystemClock_Config(void);
 void rt_hw_board_init()
 {
+	
+		/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+		HAL_Init();
+
+		/* USER CODE BEGIN Init */
+
+		/* USER CODE END Init */
+
+		/* Configure the system clock */
+		SystemClock_Config();
+		
     /* System Clock Update */
     SystemCoreClockUpdate();
     
