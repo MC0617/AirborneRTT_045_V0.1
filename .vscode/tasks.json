@@ -1,0 +1,38 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "keil build",
+            "type": "shell",
+            "command": "${config:uvPath}",
+            "args": [
+                "-j8",
+                "-b",
+                "${config:uvprojxPath}",
+                "-o",
+                "D:\\build.log"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Download to STM32",
+            "type": "shell",
+            "command": "${config:uvPath}",
+            "args": [
+                "-f",
+                "${config:uvprojxPath}",
+                "-o",
+                "D:\\download.log"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
+    ]
+}
