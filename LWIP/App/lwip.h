@@ -40,7 +40,7 @@
 #endif /* WITH_RTOS */
 
 /* USER CODE BEGIN 0 */
-
+#define __CC_ARM
 /* USER CODE END 0 */
 
 /* Global Variables ----------------------------------------------------------*/
