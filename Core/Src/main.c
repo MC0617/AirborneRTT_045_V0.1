@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "thread_com.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -83,27 +83,6 @@ static void MX_UART5_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#include <rtthread.h>
-#define THREAD_PRIORITY 25
-#define THREAD_STACK_SIZE 512
-#define THREAD_TIMESLICE 5
-
-ALIGN(RT_ALIGN_SIZE)
-static rt_uint8_t thread_stack[THREAD_STACK_SIZE];
-static struct rt_thread tid1;
-static struct rt_thread thread1;
-static rt_uint8_t thread1_stack[512];
-
-static void thread1_entry(void* parameter)
-{
-    rt_uint32_t count = 0;
-
-    while (1) {
-
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        rt_thread_mdelay(500);
-    }
-}
 
 /* USER CODE END 0 */
 
@@ -139,12 +118,7 @@ int main(void)
     MX_UART5_Init();
     MX_LWIP_Init();
     /* USER CODE BEGIN 2 */
-    rt_err_t result;
-    result = rt_thread_init(&tid1, "thread1", thread1_entry, RT_NULL, thread_stack, THREAD_STACK_SIZE, THREAD_PRIORITY, THREAD_TIMESLICE);
-    /* 启动线程 */
-    if (result == RT_EOK)
-        rt_thread_startup(&tid1);
-
+    ComInit();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -153,8 +127,6 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        MX_LWIP_Process();
-        rt_thread_mdelay(1);
         // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         // HAL_Delay(500);
         //App_process();

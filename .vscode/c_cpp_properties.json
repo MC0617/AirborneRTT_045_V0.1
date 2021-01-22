@@ -6,15 +6,19 @@
                 "${workspaceFolder}/**",
                 "D:/Dev/Arm/Keil_v5/ARM/ARMCC/include",
                 "C:/Keil_v5/ARM/ARMCC/include",
-                "E:/Keil_v5/ARM/ARMCC/include"
+                "E:/Keil_v5/ARM/ARMCLANG/include",
+                "${workspaceFolder}/Middlewares/Third_Party/LwIP/src/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
                 "USE_HAL_DRIVER",
-                "STM32F407xx",
-                "__CC_ARM"
+                "STM32F407xx"
+            ],
+            "compilerPath": "E:/Keil_v5/ARM/ARMCLANG/bin/armclang.exe",
+            "compilerArgs": [
+                "--target=arm-arm-none-eabi"
             ],
             "intelliSenseMode": "gcc-x86",
             "cStandard": "c11",

@@ -855,8 +855,7 @@ d=airbornertt_045_v0.1\startup_stm32f407xx.d -oairbornertt_045_v0.1\startup_stm
 32f407xx.o -I.\RTE\_AirborneRTT_045_V0.1 -IE:\Keil_v5\ARM\PACK\Keil\STM32F4xx_D
 FP\2.9.0\Drivers\CMSIS\Device\ST\STM32F4xx\Include -IE:\Keil_v5\ARM\CMSIS\Inclu
 de --predefine="__UVISION_VERSION SETA 529" --predefine="STM32F407xx SETA 1" --
-predefine="STM32F407xx SETA 1" --list=startup_stm32f407xx.lst startup_stm32f407
-xx.s
+list=startup_stm32f407xx.lst startup_stm32f407xx.s
 
 
 

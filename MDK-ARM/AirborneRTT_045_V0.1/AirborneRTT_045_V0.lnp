@@ -120,6 +120,8 @@
 "airbornertt_045_v0.1\thread.o"
 "airbornertt_045_v0.1\timer.o"
 "airbornertt_045_v0.1\cpuport.o"
+"airbornertt_045_v0.1\thread_com.o"
+"airbornertt_045_v0.1\udp_echoserver.o"
 --strict --scatter "AirborneRTT_045_V0.1\AirborneRTT_045_V0.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
