@@ -50,7 +50,7 @@ extern "C" {
 
 /* USER CODE END EM */
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -87,6 +87,14 @@ void Error_Handler(void);
 #define AZ_LIM_Pin GPIO_PIN_0
 #define AZ_LIM_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
+
+#define ETH_RST_Pin GPIO_PIN_2
+#define ETH_RST_GPIO_Port GPIOB
+
+#define AZ_EC_TIM TIM1
+#define EL_EC_TIM TIM2
+#define RL_EC_TIM TIM3
+#define POL_EC_TIM TIM4
 
 /* USER CODE END Private defines */
 

@@ -23,7 +23,15 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "MotorControl.h"
+#include "Parameters.h"
+#include "Senser.h"
+#include "beacon.h"
+#include "mems.h"
+#include "rtthread.h"
 #include "thread_com.h"
+#include "thread_ctrl.h"
+#include "udp_echoserver.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -64,7 +72,7 @@ DMA_HandleTypeDef hdma_usart3_tx;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
+void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART1_UART_Init(void);
 static void MX_USART2_UART_Init(void);
@@ -116,9 +124,12 @@ int main(void)
     MX_TIM10_Init();
     MX_TIM11_Init();
     MX_UART5_Init();
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     MX_LWIP_Init();
     /* USER CODE BEGIN 2 */
     ComInit();
+    CtrlInit();
+    ParamsInit();
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -127,8 +138,89 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        // HAL_Delay(500);
+        rt_thread_mdelay(5);
+
+#ifndef _DEBUG_
+        // GetMemsData();
+#else
+        while (tickTimer5ms == 0) {
+        }
+        tickTimer5ms = 0;
+        Senser.GPSX = 108.99;
+        Senser.GPSY = 34.15;
+        Senser.GPSH = 520;
+#endif
+        PilotLampControl();
+        AnalysisDataPC();
+        DataCollection();
+
+        if (WorkMode == Mode_Hand_Control) {
+        } else {
+            //寻零
+            if (AZFindZeroEndFlag == 0 || ELFindZeroEndFlag == 0 || ROLLFindZeroEndFlag == 0 || POLFindZeroEndFlag == 0) {
+                ZeroCheck();
+            } else {
+                //初始航向校准
+                if (HeadCheckFlag == 0) {
+                    WorkMode = Mode_HeadCheck;
+                    HeadCalibrate();
+                }
+
+                switch (WorkMode) {
+                case Mode_Stand_By:
+                    StandBy();
+                    break;
+                case Mode_AimSatellite:
+                    AimSatellite();
+                    break;
+                case Mode_Tracking:
+                    AGCFilter();
+                    TrackCircle();
+                    MotoCtr.AZSpeed = PositionControlAZ(MotoCtr.AZPerset, Senser.Angle_AZ);
+                    MotoCtr.ESpeed = PositionControlEL(MotoCtr.ELPerset, Senser.Angle_EL);
+                    MotoCtr.ROLLSpeed = PositionControlROLL(MotoCtr.ROLLPerset, Senser.Angle_ROLL);
+                    MotoCtr.POLSpeed = PositionControlPOLPoint(MotoCtr.POLPerset, Senser.Angle_POL);
+                    break;
+                case Mode_Searching:
+                    SearchAGCMax(Senser.AgcMAx.AZg, Senser.AgcMAx.ELg);
+                    break;
+                case Mode_Debug_Speed:
+                    break;
+                case Mode_Debug_Position:
+                    DebugPosition();
+                    break;
+                case Mode_Debug_Position_Sin:
+                    DebugPositionSin();
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        // MotoCtr.AZSpeed = 0;
+        // MotoCtr.ESpeed = 0;
+        // MotoCtr.ROLLSpeed = 0;
+        // MotoCtr.POLSpeed = 0;
+
+        SpeedCtrl();
+
+        BugSys();
+
+        SendMsgDMA();
+
+        //设置接收机参数，载波频率、符码率
+        if (BC_IsNeedSet() != STATE_OK) {
+            BC_SetBCInfo();
+            BC_GetBCInfo();
+        }
+
+        // MEMS航向校准
+        AmandMemsNew();
+
+        //若需要进行数据存储，则将数据写入Flash
+        FlashDataWrite();
+
         //App_process();
     }
     /* USER CODE END 3 */
@@ -219,7 +311,7 @@ static void MX_TIM1_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM1_Init 2 */
-
+    HAL_TIM_Base_Start_IT(&htim1);
     /* USER CODE END TIM1_Init 2 */
 }
 
@@ -265,7 +357,7 @@ static void MX_TIM2_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM2_Init 2 */
-
+    HAL_TIM_Base_Start_IT(&htim2);
     /* USER CODE END TIM2_Init 2 */
 }
 
@@ -311,7 +403,7 @@ static void MX_TIM3_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM3_Init 2 */
-
+    HAL_TIM_Base_Start_IT(&htim3);
     /* USER CODE END TIM3_Init 2 */
 }
 
@@ -357,7 +449,7 @@ static void MX_TIM4_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM4_Init 2 */
-
+    HAL_TIM_Base_Start_IT(&htim4);
     /* USER CODE END TIM4_Init 2 */
 }
 
@@ -398,7 +490,7 @@ static void MX_TIM10_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM10_Init 2 */
-
+    HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
     /* USER CODE END TIM10_Init 2 */
     HAL_TIM_MspPostInit(&htim10);
 }
@@ -440,6 +532,7 @@ static void MX_TIM11_Init(void)
         Error_Handler();
     }
     /* USER CODE BEGIN TIM11_Init 2 */
+    HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
 
     /* USER CODE END TIM11_Init 2 */
     HAL_TIM_MspPostInit(&htim11);
@@ -630,7 +723,7 @@ static void MX_DMA_Init(void)
   * @param None
   * @retval None
   */
-static void MX_GPIO_Init(void)
+void MX_GPIO_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct = { 0 };
 
@@ -655,6 +748,9 @@ static void MX_GPIO_Init(void)
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(TX_DIR_GPIO_Port, TX_DIR_Pin, GPIO_PIN_RESET);
+
+    /*Configure GPIO pin Output Level */
+    HAL_GPIO_WritePin(ETH_RST_GPIO_Port, ETH_RST_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pins : EL_LIM_Pin RX_LIM_Pin TX_LIM_Pin AZ_LIM_Pin */
     GPIO_InitStruct.Pin = EL_LIM_Pin | RX_LIM_Pin | TX_LIM_Pin | AZ_LIM_Pin;
@@ -689,6 +785,13 @@ static void MX_GPIO_Init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     HAL_GPIO_Init(TX_DIR_GPIO_Port, &GPIO_InitStruct);
+
+    /*Configure GPIO pin : ETH_RST_Pin */
+    GPIO_InitStruct.Pin = ETH_RST_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+    HAL_GPIO_Init(ETH_RST_GPIO_Port, &GPIO_InitStruct);
 }
 
 /* USER CODE BEGIN 4 */
@@ -706,6 +809,34 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
     /* USER CODE BEGIN Callback 0 */
+    uint16_t temp = 0;
+    temp = htim->Instance->CR1;
+    temp = (temp >> 4) & 0x01;
+    if (htim->Instance == TIM1) {
+        if (temp == 0x0001) {
+            Senser.AZEncoder.PeriodCount++;
+        } else if (temp == 0x0000) {
+            Senser.AZEncoder.PeriodCount--;
+        }
+    } else if (htim->Instance == TIM2) {
+        if (temp == 0x0001) {
+            Senser.ELEncoder.PeriodCount--;
+        } else if (temp == 0x0000) {
+            Senser.ELEncoder.PeriodCount++;
+        }
+    } else if (htim->Instance == TIM3) {
+        if (temp == 0x0001) {
+            Senser.ROLLEncoder.PeriodCount--;
+        } else if (temp == 0x0000) {
+            Senser.ROLLEncoder.PeriodCount++;
+        }
+    } else if (htim->Instance == TIM4) {
+        if (temp == 0x0001) {
+            Senser.POLEncoder.PeriodCount--;
+        } else if (temp == 0x0000) {
+            Senser.POLEncoder.PeriodCount++;
+        }
+    }
 
     /* USER CODE END Callback 0 */
     if (htim->Instance == TIM5) {

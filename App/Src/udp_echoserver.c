@@ -81,7 +81,7 @@ void udp_echoserver_init(void)
 
         if (err == ERR_OK) {
             /* Set a receive callback for the upcb */
-            udp_recv(upcb, &udp_echoserver_receive_callback, NULL);
+            udp_recv(upcb, udp_echoserver_receive_callback, NULL);
             initConnect(upcb);
 
         } else {
@@ -102,12 +102,11 @@ void udp_echoserver_init(void)
   * @param port the remote port from which the packet was received
   * @retval None
   */
-
+#include "rtthread.h"
 void udp_echoserver_receive_callback(void* arg, struct udp_pcb* upcb, struct pbuf* p, const ip_addr_t* addr, u16_t port)
 {
     uint32_t len;
     uint8_t buf[PC_RX_BUFSIZE] = { 0 };
-    struct pbuf* pudp_buf = p;
 
     //接收处理
     if (p->len > PC_RX_BUFSIZE)
@@ -119,20 +118,19 @@ void udp_echoserver_receive_callback(void* arg, struct udp_pcb* upcb, struct pbu
 
     if (buf[0] == 0xEB && buf[1] == 0x90) {
         len = 24;
-        saveCurrConnect(upcb, addr, port);
     } else if (buf[0] == 0xAA && buf[1] == 0x55) {
         len = buf[3] + 6;
-        saveCurrConnect(upcb, addr, port);
     } else {
-        memset(buf, 0, sizeof(buf));
         pbuf_free(p);
         return;
     }
 
-    PCRecvFlag = 1;
+    saveCurrConnect(upcb, addr, port);
     memcpy(PCRecvBuff, buf, len);
+    PCRecvFlag = 1;
     pbuf_free(p);
-    return ;
+
+    return;
 
     /* Connect to the remote client */
     udp_connect(upcb, addr, UDP_CLIENT_PORT);
