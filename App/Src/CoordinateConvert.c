@@ -511,8 +511,6 @@ void GetPol(float AZb, float ELb, float Head, float Pitch, float Roll, float* Po
     c[2][2] = 0;
 
     n[0][0] = 0;
-    n[0][1] = 0;
-    n[0][2] = 0;
 
     //----------------极化计算start-------------------
     seaa = atan(sin(antenna_longitude - satellite_longitude) / tan(antenna_latitude));
