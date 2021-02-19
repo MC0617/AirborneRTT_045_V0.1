@@ -1,5 +1,6 @@
 #include "buc.h"
 #include "stdlib.h"
+#include "string.h"
 #include "uart_api.h"
 
 BUC_Data_t BUC_Data;
@@ -155,4 +156,40 @@ void AnalysisBUC(uint8_t* buff, uint8_t len)
     }
 
     return;
+}
+
+uint8_t BUC_CH[1] = { 0 };
+void BUC_UART_RecvIT(UART_HandleTypeDef* huart)
+{
+    static int recvLength = 0;
+
+    uint8_t ch = BUC_CH[0];
+    HAL_UART_Receive_IT(huart, BUC_CH, 1);
+
+    if (BUC_RecvFlag == 1) {
+        HAL_UART_Receive_IT(huart, BUC_CH, 1);
+        BUC_RecvCount = 0;
+        return;
+    }
+
+    if (BUC_RecvCount == 0 && ch == 0xF2) {
+        BUC_RecvBuff[BUC_RecvCount] = ch;
+        BUC_RecvCount++;
+    } else if (BUC_RecvCount == 1) {
+        recvLength = ch + 2;
+        BUC_RecvBuff[BUC_RecvCount] = ch;
+        BUC_RecvCount++;
+    } else if (BUC_RecvCount < recvLength) {
+        BUC_RecvBuff[BUC_RecvCount] = ch;
+        BUC_RecvCount++;
+    } else if (BUC_RecvCount >= recvLength) {
+        BUC_RecvBuff[BUC_RecvCount] = ch;
+        BUC_RecvCount++;
+        BUC_RecvFlag = 1;
+        BUC_RecvLength = BUC_RecvCount;
+    } else {
+        BUC_RecvCount = 0;
+        BUC_RecvLength = 0;
+        memset(BUC_RecvBuff, 0, sizeof(BUC_RecvBuff));
+    }
 }

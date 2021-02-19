@@ -5,6 +5,7 @@
 #include "stdint.h"
 #include "stm32f4xx_hal.h"
 #include "stm32f4xx_hal_uart.h"
+#include "string.h"
 
 #include "Parameters.h"
 #include "Senser.h"
@@ -20,6 +21,7 @@ uint8_t DVBRecvBuffLenth = 4;
 uint8_t DVBRecvBuff[50] = { 0 };
 uint8_t DVBRecvFlag = 0;
 
+uint8_t BC_BUF[40] = { 0 };
 // 信标机配置初始化
 void BC_Init()
 {
@@ -52,14 +54,16 @@ void BC_SetMode(uint8_t mode /*, uint8_t *buf, uint8_t *len */)
 
     buf[3] = mode;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetMode(void)
 {
     uint8_t buf[] = { 0x7B, 0x09, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //DVB搜索参数-略
@@ -75,14 +79,16 @@ void BC_SetFreq(uint32_t freq)
     buf[4] = (FREQT >> 16) & 0xFF;
     buf[3] = (FREQT >> 24) & 0xFF;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetFreq(void)
 {
     uint8_t buf[] = { 0x7B, 0x08, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //捕获范围
@@ -92,14 +98,16 @@ void BC_SetCapRange(uint8_t range)
 
     buf[3] = range;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetCapRange(void)
 {
     uint8_t buf[] = { 0x7B, 0x0C, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //信标状态刷新率
@@ -109,14 +117,16 @@ void BC_SetRefreshRate(uint8_t rate)
 
     buf[3] = rate;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetRefreshRate(void)
 {
     uint8_t buf[] = { 0x7B, 0x0A, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //检波模式
@@ -138,21 +148,21 @@ void BC_SetDetection(uint32_t freq, uint32_t sym, uint32_t rng, uint8_t roll)
     buf[9] = (sym >> 8) & 0xFF;
     buf[10] = (sym >> 0) & 0xFF;
 
-    //    buf[11] = (rng >> 24) & 0xFF;
-    //    buf[12] = (rng >> 16) & 0xFF;
     buf[11] = (rng >> 8) & 0xFF;
     buf[12] = (rng >> 0) & 0xFF;
 
     buf[13] = roll;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetDetection(void)
 {
     uint8_t buf[] = { 0x7B, 0x0E, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //DVB模式
@@ -174,14 +184,16 @@ void BC_SetDVB(uint32_t freq, uint32_t sym)
     buf[9] = (sym >> 8) & 0xFF;
     buf[10] = (sym >> 0) & 0xFF;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetDVB(void)
 {
     uint8_t buf[] = { 0x7B, 0x0B, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //电压映射
@@ -191,14 +203,16 @@ void BC_SetVMapping(uint8_t sw)
 
     buf[3] = sw;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetVMapping(void)
 {
     uint8_t buf[] = { 0x7B, 0x10, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 // 馈电
@@ -209,14 +223,16 @@ void BC_SetFeed(uint8_t vo)
 
     buf[3] = vo;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetFeed(void)
 {
     uint8_t buf[] = { 0x7B, 0x05, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //22KHz单音
@@ -226,14 +242,16 @@ void BC_Set22K(uint8_t sw)
 
     buf[3] = sw;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_Get22K(void)
 {
     uint8_t buf[] = { 0x7B, 0x06, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //版本信息-略
@@ -258,14 +276,16 @@ void BC_SetVMappingRange(uint32_t min, uint32_t max)
     buf[9] = (max >> 8) & 0xFF;
     buf[10] = (max >> 0) & 0xFF;
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 void BC_GetVMappingRange(void)
 {
     uint8_t buf[] = { 0x7B, 0x12, '?', 0x7D };
 
-    HAL_UART_Transmit_DMA(BC_COM, buf, sizeof(buf));
+    memcpy(BC_BUF, buf, sizeof(buf));
+    HAL_UART_Transmit_DMA(BC_COM, BC_BUF, sizeof(buf));
 }
 
 //检波电平映射范围-略
@@ -423,4 +443,74 @@ uint8_t BC_IsNeedSet()
     }
 
     return BeaconInfo.IsSet;
+}
+
+uint8_t BC_CH[1] = { 0 };
+void BC_UART_RecvIT(UART_HandleTypeDef* huart)
+{
+    uint8_t ch = BC_CH[0];
+    HAL_UART_Receive_IT(huart, BC_CH, 1);
+    if (DVBRecvFlag == 1) {
+        HAL_UART_Receive_IT(huart, BC_CH, 1);
+        return;
+    }
+    DVBRecvCount++;
+    if (DVBRecvCount == 1) {
+        //判断帧头
+        if (ch != 0x7B) {
+            DVBRecvCount = 0;
+        } else {
+            DVBRecvBuff[DVBRecvCount - 1] = ch;
+        }
+    } else {
+        DVBRecvBuff[DVBRecvCount - 1] = ch;
+    }
+
+    if (DVBRecvCount == 3) {
+        if (DVBRecvBuff[2] != '=') {
+            memset(DVBRecvBuff, 0, 50);
+            DVBRecvCount = 0;
+        } else {
+            switch (DVBRecvBuff[1]) {
+            case 0x09: //帧头
+            case 0x0C:
+            case 0x0A:
+            case 0x10:
+            case 0x05:
+            case 0x06:
+                DVBRecvBuffLenth = 1;
+                break;
+            case 0x0F:
+                DVBRecvBuffLenth = 2;
+                break;
+            case 0x02:
+            case 0x08:
+            case 0x07:
+            case 0x0D:
+            case 'V':
+                DVBRecvBuffLenth = 4;
+                break;
+            case 0x03:
+                DVBRecvBuffLenth = 7;
+                break;
+            case 0x0B:
+            case 0x11:
+            case 0x12:
+            case 0x13:
+                DVBRecvBuffLenth = 8;
+                break;
+            case 0x0E:
+                DVBRecvBuffLenth = 11;
+                break;
+            default:
+                break;
+            }
+            DVBRecvBuffLenth += 4;
+        }
+    }
+
+    if (DVBRecvBuff[DVBRecvBuffLenth - 1] == 0x7D || DVBRecvCount >= DVBRecvBuffLenth) {
+        DVBRecvFlag = 1;
+        DVBRecvCount = 0;
+    }
 }

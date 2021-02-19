@@ -195,4 +195,7 @@ void MotoDisablePOL(void);
 // 速度控制
 void SpeedCtrl(void);
 
+// 电机使能
+void MotoInit(void);
+
 #endif

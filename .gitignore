@@ -76,10 +76,10 @@ iar/
 RIDE/
 TASKING/
 TrueSTUDIO/
-Project/Standalone/tcp_server/MDK-ARM/Project.uvguix.*
 Project/Standalone/tcp_server/MDK-ARM/*.log
 .VSCodeCounter/
 Project/Standalone/tcp_server/MDK-ARM/*.BAT
 *._2i
 *.__i
 *._ia
+*.uvguix.*

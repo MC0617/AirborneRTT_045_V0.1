@@ -27,6 +27,7 @@
 #include "Parameters.h"
 #include "Senser.h"
 #include "beacon.h"
+#include "buc.h"
 #include "mems.h"
 #include "rtthread.h"
 #include "thread_com.h"
@@ -101,7 +102,8 @@ static void MX_UART5_Init(void);
 int main(void)
 {
     /* USER CODE BEGIN 1 */
-
+    rt_uint32_t e;
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     /* USER CODE END 1 */
 
     /* MCU Configuration--------------------------------------------------------*/
@@ -124,12 +126,17 @@ int main(void)
     MX_TIM10_Init();
     MX_TIM11_Init();
     MX_UART5_Init();
-    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     MX_LWIP_Init();
     /* USER CODE BEGIN 2 */
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
     ComInit();
     CtrlInit();
     ParamsInit();
+    MotoInit();
+    HAL_UART_Receive_IT(&huart1, MEMS_CH, 1);
+    HAL_UART_Receive_IT(&huart4, BUC_CH, 1);
+    HAL_UART_Receive_IT(&huart5, BC_CH, 1);
+
     /* USER CODE END 2 */
 
     /* Infinite loop */
@@ -138,10 +145,11 @@ int main(void)
         /* USER CODE END WHILE */
 
         /* USER CODE BEGIN 3 */
-        rt_thread_mdelay(5);
+        if (rt_event_recv(&event_mems, (EVENT_FLAG_MEMSRECV | EVENT_FLAG_TIMEOUT5), RT_EVENT_FLAG_OR | RT_EVENT_FLAG_CLEAR, RT_WAITING_FOREVER, &e) == RT_EOK) {
+        }
 
 #ifndef _DEBUG_
-        // GetMemsData();
+        GetMemsData();
 #else
         while (tickTimer5ms == 0) {
         }
@@ -796,6 +804,20 @@ void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+{
+    UNUSED(huart);
+    if (huart == &huart1) {
+        MEMS_UART_RecvIT(huart);
+    } else if (huart == &huart2) {
+    } else if (huart == &huart3) {
+        BUC_UART_RecvIT(huart);
+    } else if (huart == &huart4) {
+        BC_UART_RecvIT(huart);
+    } else if (huart == &huart5) {
+        MEMS_UART_RecvIT(huart);
+    }
+}
 /* USER CODE END 4 */
 
 /**

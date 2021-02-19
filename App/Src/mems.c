@@ -9,6 +9,7 @@
 #include "Parameters.h"
 #include "Senser.h"
 #include "beacon.h"
+#include "thread_ctrl.h"
 
 extern UART_HandleTypeDef huart5;
 
@@ -97,4 +98,42 @@ void MemsZeroCheck(void)
     HAL_UART_Transmit_DMA(IN_COM, MemsSendBuff, 24);
 
     memset(MemsSendBuff, 0, 24);
+}
+
+uint8_t MemsRecvBuff[40];
+int MemsRecvCount = 0;
+uint8_t MEMS_CH[1] = { 0 };
+void MEMS_UART_RecvIT(UART_HandleTypeDef* huart)
+{
+    uint8_t ch = MEMS_CH[0];
+    HAL_UART_Receive_IT(huart, MEMS_CH, 1);
+    if (IN_RX_Completed == 0) {
+        MemsRecvCount++;
+        if (MemsRecvCount == 1) {
+            //帧头
+            if (ch != 0xAA)
+                MemsRecvCount = 0;
+            else
+                MemsRecvBuff[MemsRecvCount - 1] = ch;
+        } else if (MemsRecvCount == 2) {
+            //帧头
+            if (ch != 0x55)
+                MemsRecvCount = 0;
+            else
+                MemsRecvBuff[MemsRecvCount - 1] = ch;
+        } else if (MemsRecvCount < MEMS_RECV_LENGTH) {
+            MemsRecvBuff[MemsRecvCount - 1] = ch;
+        } else if (MemsRecvCount == MEMS_RECV_LENGTH) {
+            MemsRecvBuff[MemsRecvCount - 1] = ch;
+            for (uint8_t i = 0; i < MEMS_RECV_LENGTH; i++) {
+                IN_GetBuffer[i] = MemsRecvBuff[i];
+            }
+            IN_RX_Completed = 1;
+
+            rt_event_send(&event_mems, EVENT_FLAG_MEMSRECV);
+            MemsRecvCount = 0;
+        } else {
+            MemsRecvCount = 0;
+        }
+    }
 }

@@ -1,7 +1,7 @@
 #ifndef __BEACON_H__
 #define __BEACON_H__
 
-#include "stdint.h"
+#include "stm32f4xx.h"
 
 #define SATEMODE_DVB 0
 #define SATEMODE_DC 1
@@ -14,6 +14,11 @@
 #define BC_FEED 1 //馈电
 #define BC_MONO 2 //22k单音
 #define BC_MODE 3 //接收模式
+
+extern unsigned char DVBRecvBuffLenth;
+extern unsigned char DVBRecvBuff[];
+extern unsigned char DVBRecvFlag;
+extern unsigned char DVBSendBuff[];
 
 void BC_Set22K(uint8_t sw);
 void BC_SetFeed(uint8_t vo);
@@ -40,5 +45,8 @@ void BC_GetBCInfo(void);
 void BC_SetBCInfo(void);
 void BC_SetTrState(uint8_t pos, uint8_t isOk);
 uint8_t BC_IsNeedSet(void);
+
+extern uint8_t BC_CH[1];
+void BC_UART_RecvIT(UART_HandleTypeDef* huart);
 
 #endif //__BEACON_H__

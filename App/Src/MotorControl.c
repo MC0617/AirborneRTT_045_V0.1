@@ -239,7 +239,7 @@ void SpeedCtrPOL(float speed)
 #include "stdio.h"
 void SpeedCtrElmoAZ(float speed)
 {
-    char buff[40] = { 0 };
+    static char buff[40] = { 0 };
     uint8_t len = 0;
     int32_t sFre = 0;
 
@@ -252,7 +252,7 @@ void SpeedCtrElmoAZ(float speed)
 
 void SpeedCtrElmoEL(float speed)
 {
-    char buff[40] = { 0 };
+    static char buff[40] = { 0 };
     uint8_t len = 0;
     int32_t sFre = 0;
 

@@ -1,7 +1,7 @@
 #ifndef __BUC_H__
 #define __BUC_H__
 
-#include "stdint.h"
+#include "stm32f4xx.h"
 
 typedef enum _BUC_CMD {
     SET_GAIN = 0x01,
@@ -50,6 +50,12 @@ typedef struct _BUC_Data {
 } BUC_Data_t;
 
 extern BUC_Data_t BUC_Data;
+
+extern uint8_t BUC_RecvLength;
+extern uint8_t BUC_RecvCount;
+extern uint8_t BUC_RecvBuff[50];
+extern uint8_t BUC_RecvFlag;
+
 //功放控制
 void BUC_Ctrl(BUC_CMD_t cmd, uint32_t arg);
 
@@ -78,5 +84,9 @@ uint32_t BUC_CoverGain(float value);
 
 //返回数据解析
 void AnalysisBUC(uint8_t* buff, uint8_t len);
+
+//中断接收返回数据
+extern uint8_t BUC_CH[1];
+void BUC_UART_RecvIT(UART_HandleTypeDef* huart);
 
 #endif // !__BUC_H__

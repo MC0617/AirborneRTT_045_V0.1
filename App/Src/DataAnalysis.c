@@ -743,6 +743,7 @@ void AnalysisDebugCMD()
     }
 }
 
+#include "thread_ctrl.h"
 // 解算上位机指令
 void AnalysisDataPC(void)
 {
@@ -809,4 +810,5 @@ void AnalysisDataPC(void)
             break;
         }
     }
+    rt_event_send(&event_led, EVENT_FLAG_PCRECV);
 }
