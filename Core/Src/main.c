@@ -149,7 +149,7 @@ int main(void)
         }
 
 #ifndef _DEBUG_
-        GetMemsData();
+        GetMemsData(e);
 #else
         while (tickTimer5ms == 0) {
         }
@@ -214,8 +214,6 @@ int main(void)
         SpeedCtrl();
 
         BugSys();
-
-        SendMsgDMA();
 
         //设置接收机参数，载波频率、符码率
         if (BC_IsNeedSet() != STATE_OK) {

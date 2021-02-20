@@ -6,6 +6,8 @@
 #include "udp_echoserver.h"
 #include "httpd.h"
 
+#include "Message.h"
+
 #define THREAD_PRIORITY 25
 #define THREAD_STACK_SIZE 1024
 #define THREAD_TIMESLICE 5
@@ -38,7 +40,9 @@ static void thread_com(void* parameter)
             // PCRecvFlag = 0;
             // memset(PCRecvBuff, 0, sizeof(PCRecvBuff));
         }
-        rt_thread_mdelay(4);
+
+        SendMsgDMA(1000);
+        rt_thread_mdelay(1);
     }
 }
 

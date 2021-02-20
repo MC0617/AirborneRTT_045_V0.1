@@ -171,8 +171,6 @@ typedef struct _SENSER {
 } SENSER;
 extern SENSER Senser;
 
-extern uint8_t Control_Period_Flag; //等待时间计数器
-
 #if MEMS_TYPE == 0
 #define MEMS_RECV_LENGTH 24
 #elif MEMS_TYPE == 1
@@ -195,7 +193,7 @@ void AGCFilter(void);
 void MemsZeroCheck(void);
 
 // 等待惯导数据，并作为一个控制周期的开始
-void GetMemsData(void);
+void GetMemsData(uint32_t e);
 
 // 保存故障信息
 void BugSys(void);

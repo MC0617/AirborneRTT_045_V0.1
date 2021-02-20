@@ -12,9 +12,7 @@
 ALIGN(RT_ALIGN_SIZE)
 static rt_uint8_t thread_stack[THREAD_STACK_SIZE];
 static struct rt_thread tid_ctrl;
-
-//等待时间计数器
-uint8_t Control_Period_Flag = 0;
+rt_timer_t timer_mems;
 
 /* 事件控制块 */
 struct rt_event event_mems;
@@ -30,6 +28,11 @@ static void thread_ctrl(void* parameter)
     }
 }
 
+static void timeout_mems(void* parameter)
+{
+    rt_event_send(&event_mems, EVENT_FLAG_TIMEOUT5);
+}
+
 void CtrlInit()
 {
     rt_err_t result;
@@ -37,10 +40,17 @@ void CtrlInit()
     /* 启动线程 */
     if (result == RT_EOK) {
         rt_thread_startup(&tid_ctrl);
+    } else {
+        SendMsgUdp((uint8_t*)"thread_ctrl err", sizeof("thread_ctrl err"));
     }
 
     result = rt_event_init(&event_mems, "event_mems", RT_IPC_FLAG_FIFO);
     if (result != RT_EOK) {
         SendMsgUdp((uint8_t*)"event_mems err", sizeof("event_mems err"));
     }
+
+    timer_mems = rt_timer_create("timer_mems", timeout_mems, RT_NULL, 50, RT_TIMER_FLAG_ONE_SHOT);
+    // rt_timer_init(timer_mems, "timer_mems", timeout_mems, RT_NULL, 5, RT_TIMER_FLAG_PERIODIC | RT_TIMER_FLAG_HARD_TIMER);
+
+    rt_timer_start(timer_mems);
 }

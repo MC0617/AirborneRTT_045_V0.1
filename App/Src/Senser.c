@@ -742,27 +742,21 @@ void HeadForecast()
     //--
 }
 
+#include "thread_ctrl.h"
 // 等待惯导数据，并作为一个控制周期的开始
-void GetMemsData()
+void GetMemsData(uint32_t e)
 {
-    unsigned char recvedflag = 1;
-    Control_Period_Flag = 0;
-
-    while (IN_RX_Completed != 1) {
-        if (Control_Period_Flag > 2) {
-            Control_Period_Flag = 0;
-            Senser.MEMSInfo.LostCount++;
-            if (Senser.MEMSInfo.LostCount > 200) {
-                Senser.MEMSInfo.LostCount = 0;
-            }
-            HeadForecast();
-            recvedflag = 0;
-            Senser.MEMSInfo.BugTime++;
-            break;
+    if (e == EVENT_FLAG_TIMEOUT5) {
+        rt_timer_start(timer_mems);
+        Senser.MEMSInfo.LostCount++;
+        if (Senser.MEMSInfo.LostCount > 200) {
+            Senser.MEMSInfo.LostCount = 0;
         }
-    }
-
-    if (recvedflag == 1) {
+        HeadForecast();
+        Senser.MEMSInfo.BugTime++;
+    } else if (e == EVENT_FLAG_MEMSRECV) {
+        rt_timer_stop(timer_mems);
+        rt_timer_start(timer_mems);
         AnalysisMEMS();
         IN_RX_Completed = 0;
     }

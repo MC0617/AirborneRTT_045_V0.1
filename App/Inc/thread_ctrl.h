@@ -12,6 +12,7 @@
 /* 事件控制块 */
 extern struct rt_event event_led;
 extern struct rt_event event_mems;
+extern rt_timer_t timer_mems;
 
 void CtrlInit(void);
 

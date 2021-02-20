@@ -37,7 +37,7 @@ typedef enum {
 } CMDTYPE;
 
 // 通过DMA方式向上位机发送报文
-void SendMsgDMA(void);
+void SendMsgDMA(uint16_t timeClk);
 // 计算得到方位角速率
 int AZEncoderSpeed(void);
 // 计算得到俯仰角速率

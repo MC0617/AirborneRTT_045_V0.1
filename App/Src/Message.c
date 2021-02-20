@@ -890,16 +890,16 @@ unsigned char TrackMsg1(void)
 }
 
 // 通过DMA方式向上位机发送报文
-void SendMsgDMA(void)
+void SendMsgDMA(uint16_t timeClk)
 {
     unsigned char i = 0;
     unsigned short int temp = 0;
 
-    const int time_1000ms = 1 * _CTRCLK;
-    const int time_500ms = 0.5 * _CTRCLK;
-    const int time_100ms = 0.1 * _CTRCLK;
-    const int time_10ms = 0.01 * _CTRCLK;
-    const int time_track_period = TRACKMSGPERIOD / 1000.0f * _CTRCLK;
+    const int time_1000ms = 1 * timeClk;
+    const int time_500ms = 0.5 * timeClk;
+    const int time_100ms = 0.1 * timeClk;
+    const int time_10ms = 0.01 * timeClk;
+    const int time_track_period = TRACKMSGPERIOD / 1000.0f * timeClk;
 
     msg.PeriodCount++;
     if (msg.PeriodCount >= msg.PeriodsPerMsg) {
